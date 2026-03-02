@@ -1,3 +1,4 @@
+com/example/productmanagement/config/WebConfig.class
 com/example/productmanagement/repository/ProductRepository.class
 com/example/productmanagement/ProductManagementApplication.class
 com/example/productmanagement/controller/ProductController.class

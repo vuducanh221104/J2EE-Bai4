@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,7 +22,16 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+    // Lưu vào thư mục uploads trong thư mục home của user
+    private Path getUploadPath() throws IOException {
+        Path homePath = Paths.get(System.getProperty("user.home"));
+        Path uploadPath = homePath.resolve("product-uploads");
+        
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        return uploadPath;
+    }
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -38,14 +49,13 @@ public class ProductService {
             }
             
             String filename = UUID.randomUUID().toString() + "_" + originalFilename;
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-            
+            Path uploadPath = getUploadPath();
             Path filePath = uploadPath.resolve(filename);
-            imageFile.transferTo(filePath.toFile());
+            
+            // Copy file thủ công
+            try (InputStream inputStream = imageFile.getInputStream()) {
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
             
             product.setImage(filename);
         }
@@ -71,19 +81,18 @@ public class ProductService {
                 
                 // Delete old image if exists
                 if (updatedProduct.getImage() != null) {
-                    Path oldImagePath = Paths.get(UPLOAD_DIR + updatedProduct.getImage());
+                    Path oldImagePath = getUploadPath().resolve(updatedProduct.getImage());
                     Files.deleteIfExists(oldImagePath);
                 }
                 
                 String filename = UUID.randomUUID().toString() + "_" + originalFilename;
-                Path uploadPath = Paths.get(UPLOAD_DIR);
-                
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
-                
+                Path uploadPath = getUploadPath();
                 Path filePath = uploadPath.resolve(filename);
-                imageFile.transferTo(filePath.toFile());
+                
+                // Copy file thủ công
+                try (InputStream inputStream = imageFile.getInputStream()) {
+                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+                }
                 
                 updatedProduct.setImage(filename);
             }
@@ -101,7 +110,7 @@ public class ProductService {
             // Delete image file if exists
             if (product.get().getImage() != null) {
                 try {
-                    Path imagePath = Paths.get(UPLOAD_DIR + product.get().getImage());
+                    Path imagePath = getUploadPath().resolve(product.get().getImage());
                     Files.deleteIfExists(imagePath);
                 } catch (IOException e) {
                     e.printStackTrace();
