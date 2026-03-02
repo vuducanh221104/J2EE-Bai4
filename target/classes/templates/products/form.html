@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý sản phẩm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .btn-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn-back {
+            background-color: #888;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 th:text="${product.id == null} ? 'Thêm sản phẩm' : 'Sửa sản phẩm'">Thêm/Sửa sản phẩm</h2>
+        
+        <form th:action="${product.id == null} ? @{/products} : @{/products/edit/{id}(id=${product.id})}" 
+              th:object="${product}" 
+              method="post" 
+              enctype="multipart/form-data">
+            
+            <div class="form-group">
+                <label>Mã sản phẩm:</label>
+                <input type="text" th:field="*{code}" placeholder="Nhập mã (không bắt buộc)">
+            </div>
+            
+            <div class="form-group">
+                <label>Tên sản phẩm: *</label>
+                <input type="text" th:field="*{name}" placeholder="Nhập tên sản phẩm">
+                <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+            </div>
+            
+            <div class="form-group">
+                <label>Giá (1-9999999): *</label>
+                <input type="number" th:field="*{price}" placeholder="Nhập giá" min="1" max="9999999">
+                <span class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+            </div>
+            
+            <div class="form-group">
+                <label>Danh mục:</label>
+                <select th:field="*{category}">
+                    <option value="">-- Chọn danh mục --</option>
+                    <option value="điện thoại">Điện thoại</option>
+                    <option value="laptop">Laptop</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Hình ảnh:</label>
+                <input type="file" name="imageFile" accept="image/*">
+                <span class="error" th:if="${#fields.hasErrors('image')}" th:errors="*{image}"></span>
+            </div>
+            
+            <div class="form-group" th:if="${product.image != null}">
+                <label>Hình hiện tại:</label>
+                <div style="text-align: center;">
+                    <img th:src="@{/uploads/{image}(image=${product.image})}" width="100">
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn-submit">Lưu</button>
+                <a href="/products" class="btn-back">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
